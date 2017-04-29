@@ -16,7 +16,7 @@ public class Columns extends JPanel {
     protected static final int numColors = 5;
     public static final int CELLSIZE = 30;
     public static final int drop = 5;
-    protected static final int height = CELLSIZE*numRows + (1/2 * CELLSIZE);
+    protected static final int height = CELLSIZE*(numRows-3) + (1/2 * CELLSIZE);
     private boolean gamePlay = false;
     private boolean gameOver = false;
     private boolean isPaused = true;
@@ -242,7 +242,7 @@ public class Columns extends JPanel {
         
         public void paintComponent(Graphics g) {
             super.paintComponent(g);
-            for(int i = 0; i < numRows; i++) {
+            for(int i = 3; i < numRows; i++) {
                 for(int j = 0; j < numCols; j++) {
                     g.setColor(blocks.getColor(board[i][j]));
                     g.fillRoundRect(xPosition, yPosition, CELLSIZE, CELLSIZE, CELLSIZE/4, CELLSIZE/4);
