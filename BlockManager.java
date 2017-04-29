@@ -9,13 +9,16 @@
  */
 
 import java.awt.Color;
+import java.awt.event.ActionListener;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.util.*;
 import java.util.Random;
 
 public class BlockManager {
     //Random class to find random numbers, seeded with 10
     //for mirrored test results
-   private Random rand = new Random(10);
+   private Random rand = new Random();
    //private boolean isPlaying = false;
    //private boolean gameOver = false;
 
@@ -43,18 +46,23 @@ public class BlockManager {
        this.COLS = cols;
        this.ROWS = rows;
        generateBoard(rows, cols, numcolors);
-       emptyBoard();
+       //emptyBoard();
    }
-   
+
    /**
     * generates a new random column made of allowed characters 
     */
-  protected void nextColumn() {
+  protected void nextColumn(int drop) {
       colArray[0] = possibleChars[rand.nextInt(numColors)];
       colArray[1] = possibleChars[rand.nextInt(numColors)];
       colArray[2] = possibleChars[rand.nextInt(numColors)];
       
-      for(int i = 0; i < 3; i++) { System.out.println(colArray[i]); }
+      //for(int i = 0; i < 3; i++) { System.out.println(colArray[i]); }
+      board[0][drop] = colArray[0];
+      board[1][drop] = colArray[1];
+      board[2][drop] = colArray[2];
+      printBoard();
+      //return colArray;
   }
   
   protected Color getColor(char c) {
@@ -111,17 +119,10 @@ public class BlockManager {
        return board;
    }
    
-   /*@Override
-   public String toString() {
-       String str = " ";
-       for(int i = 0; i < ROWS; i++) {
-           for(int j = 0; j < COLS; j++) {
-               str += board[i][j];
-           }
-           str += '\n';
-       }
-       return str;
-   }*/
+   protected char[][] getEmptyBoard() {
+       emptyBoard();
+       return board;
+   }
    
    /**
     * takes the new random column and drops it as far down
@@ -129,7 +130,6 @@ public class BlockManager {
     * @param drop is the preferred column on board[][]
     */
    protected void addNextColumn(int drop) {
-       nextColumn();
        int firstRow = 0;
        for(int i = 1; i <= ROWS; i++) {
            if(board[ROWS-i][drop] == EMPTY) {
@@ -243,7 +243,7 @@ public class BlockManager {
    /**
     * Checks for floating characters and moves them down
     */
-   private void shiftBlocks() {
+   protected void shiftBlocks() {
        boolean flag = true;
        while(flag) {
            flag = false;
