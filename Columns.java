@@ -1,5 +1,6 @@
 import javax.swing.*;
 import javax.swing.Timer;
+import javax.swing.border.TitledBorder;
 
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -19,13 +20,14 @@ public class Columns extends JPanel {
     private boolean gamePlay = false;
     private boolean gameOver = false;
     private boolean isPaused = true;
+    private boolean bonusBlocks = false;
     Timer timer;
     BlockManager blocks = new BlockManager(numRows,numCols,numColors);
     private static final String START = "New Game";
     private static final String PAUSE = "Pause";
     private static final String RESUME = "Resume";
     private static final String END = "Game Over";
-    public char EMPTY = '.';
+    private char EMPTY = '.';
     protected JPanel blockPanel;
 
     public static int score = 0;
@@ -34,9 +36,10 @@ public class Columns extends JPanel {
         JButton pausePlay = new JButton(START);
         
         public ButtonPanel() {
-            setBackground(Color.BLACK);
+            setBackground(new Color(96,96,96));
             add(pausePlay);
             pausePlay.addActionListener(this);
+            pausePlay.setFont(new Font("Serif", Font.BOLD, 20));
         }
         
         public void actionPerformed(ActionEvent e) {
@@ -70,20 +73,33 @@ public class Columns extends JPanel {
     
     public class ScorePanel extends JPanel {
         JLabel textualTextduction = new JLabel();
+        TitledBorder title = new TitledBorder("Current Score:");
+        
         public ScorePanel() {
             this.add(textualTextduction);
-            updateScore(score);
+            textualTextduction.setFont(new Font("Serif", Font.BOLD, 20));
+            textualTextduction.setOpaque(true);
+            textualTextduction.setBorder(title);
+            textualTextduction.setPreferredSize(new Dimension(150,40));
+            textualTextduction.setBackground(new Color(96,96,96));
+            textualTextduction.setForeground(Color.WHITE);
+            ActionListener scoreListener = new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    updateScore(score);
+                }
+            };
+            Timer scoreTimer = new Timer(1000,scoreListener);
+            scoreTimer.start();
         }
         
         public void updateScore(int curScore) {
-            textualTextduction.setText("Current Score: " + score);
+            textualTextduction.setText(" " + score);
         }
     }
     
     public class EastPanel extends JPanel {
         public EastPanel() {
-            setPreferredSize(new Dimension(200, height));
-            setBackground(Color.WHITE);
+            setBackground(new Color(0,76,153));
             JPanel buttonPanel = new ButtonPanel();
             add(buttonPanel, BorderLayout.SOUTH);
             JPanel scorePanel = new ScorePanel();
@@ -100,37 +116,32 @@ public class Columns extends JPanel {
 
         public BlockPanel() {
             setPreferredSize(new Dimension(numCols*CELLSIZE,height));
-            setBackground(Color.LIGHT_GRAY);
+            setBackground(Color.BLACK);
             this.addKeyListener(this);
             ActionListener actionL = new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
                     if(!isPaused) {
                         if(row < numRows -1) {
-                            if(board[row+1][col] == EMPTY) {
-                                board[row+1][col] = board[row][col];
-                                board[row][col] = board[row-1][col];
-                                board[row-1][col] = board[row-2][col];
-                                board[row-2][col] = EMPTY;
-                            }
-                            row++;
-                            repaint(); 
+                            if(row == 3) bonusBlocks = false;
+                            moveCurrentDown(false);
                         } else {
                             while(blocks.willRemove()) {
                                 int goneBlocks = blocks.removeBlocks();
+                                blocks.printBoard();
+                                repaint();
+                                try {
+                                    Thread.sleep(1000);
+                                } catch (InterruptedException e1) {
+                                    e1.printStackTrace();
+                                }
+                                if(goneBlocks > 3) bonusBlocks = true;
                                 score += 2*goneBlocks;
-                                blocks.sameRows.clear(); blocks.sameCols.clear();
                                 blocks.shiftBlocks();
                                 repaint();
                             }
-                            if(row <= 6 ) {
-                                gameOver = true;
-                                System.out.println("GAME OVER");
-                            }
-                            else {
                             blocks.nextColumn(drop);
                             row = 2;
                             col = drop;
-                            }
                         }
                     }
                 } 
@@ -154,10 +165,10 @@ public class Columns extends JPanel {
                     rotateThrough();
                 }
                 if(e.getKeyCode() == KeyEvent.VK_RIGHT) {
-                    moveCurrentRight();
+                    if(col < numCols-1) moveCurrentRight();
                 }
                 if(e.getKeyCode() == KeyEvent.VK_LEFT) {
-                    moveCurrentLeft();
+                    if(col > 0) moveCurrentLeft();
                 }
            }
         }  
@@ -165,21 +176,14 @@ public class Columns extends JPanel {
         private void moveCurrentDown(boolean all) {
             if(all) {
                 int nextAvailable = findNextRow(col);
-                System.out.println(nextAvailable);
-                board[nextAvailable][col] = board[row][col];
-                board[nextAvailable-1][col] = board[row-1][col];
-                board[nextAvailable-2][col] = board[row-2][col];
-                board[row][col] = EMPTY;
-                board[row-1][col] = EMPTY;
-                board[row-2][col] = EMPTY;
+                for(int i = 0; i < 3; i++) board[nextAvailable-i][col] = board[row-i][col];
+                for(int i = 0; i < 3; i++) board[row-i][col] = EMPTY;
                 row = numRows-1;
                 repaint();
             }
             else {
-                if(board[row+1][col] == EMPTY) {
-                    board[row+1][col] = board[row][col];
-                    board[row][col] = board[row-1][col];
-                    board[row-1][col] = board[row-2][col];
+                if(board[row+1][col] == EMPTY) {  
+                    for(int i = 0; i < 3; i++) board[row-i+1][col] = board[row-i][col];
                     board[row-2][col] = EMPTY;
                 }
                 row++;
@@ -200,6 +204,7 @@ public class Columns extends JPanel {
         
         private void changeBlockPosition(int dx, int dy) {
             if(col > 0 || col < numCols-1) {
+                
                 if(board[row][col+dy] == EMPTY) {
                     if(board[row-1][col+dy] == EMPTY) {
                         if(board[row-2][col+dy] == EMPTY) {
@@ -215,7 +220,7 @@ public class Columns extends JPanel {
                 }
             }
 
-        }
+        }   
           
         public void moveCurrentRight() {
             changeBlockPosition(0,1);
@@ -247,6 +252,12 @@ public class Columns extends JPanel {
                 xPosition = 0;
             }
             yPosition = 0;
+            if(bonusBlocks) {
+                g.setColor(Color.YELLOW);
+                g.setFont(new Font("Arial", Font.BOLD, 70)); 
+                g.drawString("BONUS", 40, CELLSIZE*4);
+                g.drawString("BLOCKS!", CELLSIZE/5, CELLSIZE*8);
+            } 
         }
 
         @Override
@@ -259,21 +270,18 @@ public class Columns extends JPanel {
     }
     
     public class MainFrame extends JFrame { 
-        JFrame fralPacino = new JFrame("COLUMNS BIATCH");
+        JFrame fralPacino = new JFrame("COLUMNS");
         public MainFrame() {
             fralPacino.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-            fralPacino.setBackground(Color.BLUE);
+            fralPacino.setBackground(Color.BLACK);
             fralPacino.setLayout(new BorderLayout());
-                   
-            //column = new BlockManager(numRows,numCols,5);
             blockPanel = new BlockPanel();
             blockPanel.setFocusable(true);
             blockPanel.requestFocusInWindow();
-            fralPacino.add(blockPanel, BorderLayout.WEST);
+            fralPacino.add(blockPanel, BorderLayout.CENTER);
             JPanel eastPanel = new EastPanel();
-            fralPacino.add(eastPanel, BorderLayout.EAST);
-            
-            
+            fralPacino.add(eastPanel, BorderLayout.SOUTH);
+                
             fralPacino.getContentPane();
             fralPacino.pack();
             fralPacino.setVisible(true);
@@ -289,6 +297,7 @@ public class Columns extends JPanel {
         return gameOver;
     }
     */
+    
     private Columns() {
         @SuppressWarnings("unused")
         MainFrame frame = new MainFrame();
