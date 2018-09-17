@@ -61,17 +61,17 @@ public class BlockManager {
       board[0][drop] = colArray[0];
       board[1][drop] = colArray[1];
       board[2][drop] = colArray[2];
-      printBoard();
+      //printBoard();
       //return colArray;
   }
   
   protected Color getColor(char c) {
-      if(c == '.') return Color.BLACK;
-      if(c == '*') return Color.MAGENTA;
-      if(c == '#') return Color.LIGHT_GRAY;
-      if(c == '$') return Color.GREEN;
-      if(c == '&') return Color.CYAN;
-      if(c == '@') return Color.ORANGE;
+      if(c == '.') return new Color(224,224,224);
+      if(c == '*') return new Color(128,128,128);
+      if(c == '#') return new Color(192,192,192);
+      if(c == '$') return new Color(255,255,0);
+      if(c == '&') return new Color(160,160,160);
+      if(c == '@') return new Color(96,96,96);
       return Color.WHITE;
   }
   
@@ -98,11 +98,7 @@ public class BlockManager {
        //printBoard();
    }
    
-   /**
-    * My overridden toString() wasn't working, so instead
-    * I used a stringBuilder similar to Gomoku to print a string
-    * of characters to represent the board
-    */
+//printBoard() method using StringBuilder class
    protected void printBoard() {
        StringBuilder sB = new StringBuilder();
        for(int i = 0; i < ROWS; i++) {
@@ -146,7 +142,6 @@ public class BlockManager {
     * checks horizontal, vertical, and diagonals for 3 or more in a row
     * @return boolean returned true if there is at least one matching set
     * 
-    * I will refactor this smaller hopefully for the game
     */
    private boolean checkWin() {
        boolean flag = false;
@@ -198,6 +193,8 @@ public class BlockManager {
        return flag;
    }
    
+   //REFACTOR YOUR WIN SEARCH
+   
    /**
     * @return true if any blocks will be removed
     */
@@ -229,10 +226,12 @@ public class BlockManager {
        int blocks = 0;
        for(int i = 0; i < sameRows.size(); i++) {
            if(board[sameRows.get(i)][sameCols.get(i)] != EMPTY) {
+               if(board[sameRows.get(i)][sameCols.get(i)] == '$') blocks++;
                board[sameRows.get(i)][sameCols.get(i)] = EMPTY;
                blocks++;
            }
        }
+       sameRows.clear(); sameCols.clear();
        return blocks;
    }
    
@@ -259,6 +258,18 @@ public class BlockManager {
                }
            }
        }   
+   }
+   
+   protected boolean isGameOver() {
+       for(int i = 0; i < COLS; i++)
+       {
+           if(board[3][i] != EMPTY)
+           {
+               System.out.println("GAME OVER FLAG");
+               return true;
+           }
+       }
+       return false;
    }
    
    /**Pseudo-main function called in BlockManagerTest
