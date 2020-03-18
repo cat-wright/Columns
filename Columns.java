@@ -289,10 +289,9 @@ public class Columns extends JPanel {
             //Displays BONUS BLOCKS when yellow or more than 3 are removed
             if(bonusBlocks) {
                 g.setColor(Color.YELLOW);
-                g.setFont(new Font("Arial", Font.BOLD, 70)); 
-                g.drawString("BONUS", (int)(0.2*numCols*CELLSIZE), CELLSIZE*4);
-                g.drawString("BLOCKS!", (int)(0.1*numCols*CELLSIZE), CELLSIZE*8);
-            } 
+                g.setFont(new Font("Arial", Font.BOLD, 40));
+                g.drawString("BONUS BLOCKS", (int)(0.1*numCols*CELLSIZE), CELLSIZE*4);
+            }
             
         }
 

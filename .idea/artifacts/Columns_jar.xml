@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="Columns:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/Columns_jar</output-path>
+    <root id="archive" name="Columns.jar">
+      <element id="module-output" name="Columns" />
+    </root>
+  </artifact>
+</component>
